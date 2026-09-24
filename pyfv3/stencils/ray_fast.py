@@ -103,7 +103,7 @@ def ray_fast_wind_compute(
             p_ref = p_ref[0, 0, 1]
     # ray_fast_wind(u)
     with computation(FORWARD):
-        with interval(0, 1):
+        with interval(0, 1):  # noqa: SIM117
             with horizontal(region[: local_ie + 1, :]):
                 if pfull < rf_cutoff:
                     # dmdir = (1.0 - rf) * dp * wind
@@ -111,7 +111,7 @@ def ray_fast_wind_compute(
                     u *= rf
                 else:
                     p_ref = 0
-        with interval(1, None):
+        with interval(1, None):  # noqa: SIM117
             with horizontal(region[: local_ie + 1, :]):
                 dmdir = dmdir[0, 0, -1]
                 if pfull < rf_cutoff:
@@ -120,20 +120,20 @@ def ray_fast_wind_compute(
     with computation(BACKWARD), interval(0, -1):
         if pfull < rf_cutoff:
             dmdir = dmdir[0, 0, 1]
-    with computation(PARALLEL), interval(...):
+    with computation(PARALLEL), interval(...):  # noqa: SIM117
         with horizontal(region[: local_ie + 1, :]):
             if pfull < rf_cutoff_nudge:
                 u += dmdir / p_ref
     # ray_fast_wind(v)
     with computation(FORWARD):
-        with interval(0, 1):
+        with interval(0, 1):  # noqa: SIM117
             with horizontal(region[:, : local_je + 1]):
                 if pfull < rf_cutoff:
                     dmdir = dm_layer(rf, delta_p_ref, v)
                     v *= rf
                 else:
                     p_ref = 0
-        with interval(1, None):
+        with interval(1, None):  # noqa: SIM117
             with horizontal(region[:, : local_je + 1]):
                 dmdir = dmdir[0, 0, -1]
                 if pfull < rf_cutoff:
@@ -142,14 +142,14 @@ def ray_fast_wind_compute(
     with computation(BACKWARD), interval(0, -1):
         if pfull < rf_cutoff:
             dmdir = dmdir[0, 0, 1]
-    with computation(PARALLEL), interval(...):
+    with computation(PARALLEL), interval(...):  # noqa: SIM117
         with horizontal(region[:, : local_je + 1]):
             if pfull < rf_cutoff_nudge:
                 v += dmdir / p_ref
     # ray_fast_w
-    with computation(PARALLEL), interval(...):
+    with computation(PARALLEL), interval(...):  # noqa: SIM117
         with horizontal(region[: local_ie + 1, : local_je + 1]):
-            if __INLINED(not hydrostatic):
+            if __INLINED(not hydrostatic):  # noqa: SIM102
                 if pfull < rf_cutoff:
                     w *= rf
 
