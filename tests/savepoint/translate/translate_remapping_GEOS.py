@@ -401,7 +401,7 @@ class TranslateRemapping_GEOS(ParallelTranslateBaseSlicing):
             if name in ["mfx_R4", "mfy_R4", "cx_R4", "cy_R4"]:
                 storages[name] = state[name[:-3]]
             elif isinstance(state[name], Quantity):
-                storages[name] = state[name].data
+                storages[name] = state[name]
             elif len(self.outputs[name]["dims"]) > 0:
                 storages[name] = state[name]  # assume it's a storage
             else:
