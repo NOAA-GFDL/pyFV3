@@ -36,7 +36,6 @@ from ndsl.stencils.c2l_ord import CubedToLatLon
 from ndsl.typing import Communicator
 from pyfv3._config import DynamicalCoreConfig
 from pyfv3.dycore_state import DycoreState
-from pyfv3.optimization import get_optimization_config
 from pyfv3.stencils import fvtp2d, tracer_2d_1l
 from pyfv3.stencils.compute_total_energy import ComputeTotalEnergy
 from pyfv3.stencils.del2cubed import HyperdiffusionDamping
@@ -241,15 +240,13 @@ class DynamicalCore(NDSLRuntime):
             timestep: model timestep
         """
 
-        oconfig = get_optimization_config(stencil_factory.backend)
-        super().__init__(stencil_factory, oconfig)
+        super().__init__(stencil_factory)
 
         orchestrate(
             obj=self,
             config=stencil_factory.config.dace_config,
             method_to_orchestrate="step_dynamics",
             dace_compiletime_args=["state", "timer"],
-            optimization_config=oconfig,
         )
 
         orchestrate(
@@ -257,7 +254,6 @@ class DynamicalCore(NDSLRuntime):
             config=stencil_factory.config.dace_config,
             method_to_orchestrate="compute_preamble",
             dace_compiletime_args=["state"],
-            optimization_config=oconfig,
         )
 
         orchestrate(
@@ -265,7 +261,6 @@ class DynamicalCore(NDSLRuntime):
             config=stencil_factory.config.dace_config,
             method_to_orchestrate="_compute",
             dace_compiletime_args=["state", "timer"],
-            optimization_config=oconfig,
         )
 
         if timestep == timedelta(seconds=0):
