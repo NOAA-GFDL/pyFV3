@@ -1,6 +1,4 @@
-import ndsl.constants as constants
-from ndsl import NDSLRuntime, QuantityFactory, StencilFactory
-from ndsl.constants import I_DIM, J_DIM
+from ndsl import NDSLRuntime, QuantityFactory, StencilFactory, constants
 from ndsl.dsl.gt4py import BACKWARD, FORWARD, PARALLEL, computation
 from ndsl.dsl.gt4py import function as gtfunction
 from ndsl.dsl.gt4py import interval
@@ -363,16 +361,6 @@ class AdjustNegativeTracerMixingRatio(NDSLRuntime):
             self._d0_vap = constants.CV_VAP - constants.C_LIQ
         self._lv00 = constants.HLV - self._d0_vap * constants.TICE
 
-        self._sum1 = quantity_factory.zeros(
-            [I_DIM, J_DIM],
-            units="unknown",
-            dtype=Float,
-        )
-        self._sum2 = quantity_factory.zeros(
-            [I_DIM, J_DIM],
-            units="unknown",
-            dtype=Float,
-        )
         self._fix_neg_water = stencil_factory.from_origin_domain(
             func=fix_neg_water,
             origin=grid_indexing.origin_compute(),
@@ -425,21 +413,13 @@ class AdjustNegativeTracerMixingRatio(NDSLRuntime):
             self._lv00,
             self._d0_vap,
         )
-        # TODO - optimisation: those could be merged into one stencil. To keep
-        # the physical meaning we could keep the structure as @gtstencil.function
-        # TODO: when gt4py supports 2D temporaries, refactor sum1 and sum2 to internal
-        # stencil temporaries
         self._fillq(
             tracers[:, :, :, FVTracers.index("graupel")],
             delp,
-            self._sum1,
-            self._sum2,
         )
         self._fillq(
             tracers[:, :, :, FVTracers.index("rain")],
             delp,
-            self._sum1,
-            self._sum2,
         )
 
         # TODO: vapor cannot be passed directly due to an issue in schedule tree
