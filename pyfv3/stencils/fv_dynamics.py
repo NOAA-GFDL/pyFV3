@@ -58,6 +58,18 @@ class DryMassRoundOff(NDSLRuntime):
     ) -> None:
         super().__init__(stencil_factory)
 
+        orchestrate(
+            obj=self,
+            config=stencil_factory.config.dace_config,
+            method_to_orchestrate="reset",
+        )
+
+        orchestrate(
+            obj=self,
+            config=stencil_factory.config.dace_config,
+            method_to_orchestrate="apply",
+        )
+
         self._psx_2d = self.make_local(
             quantity_factory,
             [I_DIM, J_DIM],
