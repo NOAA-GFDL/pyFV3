@@ -638,7 +638,8 @@ class DynamicalCore(NDSLRuntime):
         self.step_dynamics(*args, **kwargs)
 
     def _compute(self, state: DycoreState, timer: Timer) -> None:
-        self.compute_preamble(state)
+        with timer.clock("Preamble"):
+            self.compute_preamble(state)
 
         for k_split in range(self._k_split):
             n_map = k_split + 1
@@ -773,25 +774,27 @@ class DynamicalCore(NDSLRuntime):
                 self._increment(state.cyd, self._cy_local)
 
                 if last_step:
-                    if not self.config.hydrostatic:
-                        # TODO: GFDL should implement the "vulcan omega" update,
-                        # use hydrostatic omega instead of this conversion
-                        self._omega_from_w(
-                            state.delp,
-                            state.delz,
-                            state.w,
-                            state.omga,
-                        )
-                    if self.config.nf_omega > 0:
-                        self._omega_halo_updater.update()
-                        self._hyperdiffusion(state.omga, Float(0.18) * self._da_min)
+                    with timer.clock("Omega"):
+                        if not self.config.hydrostatic:
+                            # TODO: GFDL should implement the "vulcan omega" update,
+                            # use hydrostatic omega instead of this conversion
+                            self._omega_from_w(
+                                state.delp,
+                                state.delz,
+                                state.w,
+                                state.omga,
+                            )
+                        if self.config.nf_omega > 0:
+                            self._omega_halo_updater.update()
+                            self._hyperdiffusion(state.omga, Float(0.18) * self._da_min)
 
-        if self.config.nwat >= 6:
-            self._adjust_tracer_mixing_ratio(
-                state.tracers,
-                state.pt,
-                state.delp,
-            )
+        with timer.clock("AdjNegRatio"):
+            if self.config.nwat >= 6:
+                self._adjust_tracer_mixing_ratio(
+                    state.tracers,
+                    state.pt,
+                    state.delp,
+                )
 
         # convert d-grid x-wind and y-wind to
         # cell-centered zonal and meridional winds
@@ -799,9 +802,10 @@ class DynamicalCore(NDSLRuntime):
         # usage of ua and va, and rename state.ua and state.va
         # to reflect that they are cell center
         # zonal and meridional wind
-        self._cubed_to_latlon(
-            state.u,
-            state.v,
-            state.ua,
-            state.va,
-        )
+        with timer.clock("CubedToLatLon"):
+            self._cubed_to_latlon(
+                state.u,
+                state.v,
+                state.ua,
+                state.va,
+            )
