@@ -401,7 +401,6 @@ class AdjustNegativeTracerMixingRatio(NDSLRuntime):
             pt (inout):
             delp (in):
         """
-        # TODO: remove delz and peln from args
         self._fix_neg_water(
             pt,
             tracers[:, :, :, FVTracers.index("vapor")],
