@@ -27,7 +27,6 @@ from ndsl import (
 )
 from ndsl.comm.comm_abc import Comm
 from ndsl.dsl import NDSL_GLOBAL_PRECISION
-from ndsl.dsl.dace.build import set_distributed_caches
 from ndsl.grid import DampingCoefficients, GridData, MetricTerms
 from ndsl.logging import ndsl_log
 from ndsl.optional_imports import cupy as cp
@@ -60,7 +59,7 @@ class StencilBackendCompilerOverride:
 
         # We abuse the DaCe build system
         if not self.no_op:
-            set_distributed_caches(config, force_build=True)
+            config._set_distributed_caches(config, force_build=True)
 
         # We remove warnings from the stencils compiling when in critical and/or
         # error
