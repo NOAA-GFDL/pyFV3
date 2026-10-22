@@ -3,7 +3,7 @@ build-backend = "setuptools.build_meta"
 requires = ["setuptools >= 77.0.3"]
 
 [project]
-authors = [{name = "NOAA - Geophysical Fluid Dynamics Laboratory", email = "oliver.elbert@noaa.gov"}]
+authors = [{ name = "NOAA - Geophysical Fluid Dynamics Laboratory", email = "oliver.elbert@noaa.gov" }]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "Intended Audience :: Developers",
@@ -43,7 +43,7 @@ extras = [
   "pyfv3[ndsl]",
   "pyfv3[test]"
 ]
-ndsl = ["ndsl @ git+https://github.com/NOAA-GFDL/NDSL.git@2026.08.00"]
+ndsl = ["ndsl @ git+https://github.com/NOAA-GFDL/NDSL.git@2026.10.01"]
 test = [
   "coverage",
   "pytest",
