@@ -33,11 +33,9 @@ from ndsl.dsl.gt4py import (
     FORWARD,
     PARALLEL,
     computation,
-    horizontal,
     interval,
-    region,
 )
-from ndsl.dsl.typing import Float, FloatField, FloatField64, FloatFieldIJ
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from ndsl.grid import DampingCoefficients, GridData
 from ndsl.stencils import copy
 from ndsl.typing import Communicator
@@ -53,38 +51,6 @@ if Float == np.float32:
     HUGE_R = Float(1.0e8)
 else:
     HUGE_R = Float(1.0e40)
-
-
-def zero_data(
-    mfxd: FloatField64,
-    mfyd: FloatField64,
-    cxd: FloatField64,
-    cyd: FloatField64,
-    heat_source: FloatField,
-    diss_estd: FloatField,
-    first_timestep: bool,
-):
-    """
-    Args:
-        mfxd (out): mass flux in x direction
-        mfyd (out): mass flux in y direction
-        cxd (out): courant number in x direction
-        cyd (out): courant number in y direction
-        heat_source (out): heat accumulated from diffusion of kinetic energy
-            gets applied at the end of all acoustic steps
-        diss_estd (out): how much energy is dissipated, is mainly captured
-            to send to the stochastic physics (in contrast to heat_source)
-        first_timestep (in): is this the first acoustic timestep?
-    """
-    with computation(PARALLEL), interval(...):
-        mfxd = 0.0
-        mfyd = 0.0
-        cxd = 0.0
-        cyd = 0.0
-        if first_timestep:
-            with horizontal(region[3:-3, 3:-3]):
-                heat_source = 0.0
-                diss_estd = 0.0
 
 
 def gz_from_surface_height_and_thicknesses(
@@ -566,11 +532,6 @@ class AcousticDynamics(NDSLRuntime):
             )
         )
 
-        self._zero_data = stencil_factory.from_origin_domain(
-            zero_data,
-            origin=grid_indexing.origin_full(),
-            domain=grid_indexing.domain_full(add=(1, 1, 0)),
-        )
         ax_offsets_pe = grid_indexing.axis_offsets(
             grid_indexing.origin_full(),
             grid_indexing.domain_full(add=(0, 0, 1)),
@@ -697,15 +658,14 @@ class AcousticDynamics(NDSLRuntime):
         self._halo_updaters.u__v.start()
         self._halo_updaters.q_con__cappa.wait()
 
-        self._zero_data(
-            mfxd,
-            mfyd,
-            cxd,
-            cyd,
-            self.heat_source,
-            state.diss_estd,
-            n_map == 1,
-        )
+        # Zero-out data
+        mfxd[:] = 0.0
+        mfyd[:] = 0.0
+        cxd[:] = 0.0
+        cyd[:] = 0.0
+        if n_map == 1:
+            self.heat_source[3:-3, 3:-3, :] = 0.0
+            state.diss_estd[3:-3, 3:-3, :] = 0.0
 
         if not self.hydrostatic:
             self._pk3[:] = HUGE_R
