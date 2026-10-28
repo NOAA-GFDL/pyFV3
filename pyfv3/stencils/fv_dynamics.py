@@ -322,6 +322,7 @@ class DynamicalCore(NDSLRuntime):
         self.grid_data = grid_data
         self.grid_indexing = grid_indexing
         self._da_min = damping_coefficients.da_min
+        self._damping_coeff_for_omega = Float(0.18) * self._da_min
         self.config = config
 
         self.dry_mass_control = DryMassRoundOff(
@@ -786,7 +787,7 @@ class DynamicalCore(NDSLRuntime):
                             )
                         if self.config.nf_omega > 0:
                             self._omega_halo_updater.update()
-                            self._hyperdiffusion(state.omga, Float(0.18) * self._da_min)
+                            self._hyperdiffusion(state.omga, self._damping_coeff_for_omega)
 
         with timer.clock("AdjNegRatio"):
             if self.config.nwat >= 6:

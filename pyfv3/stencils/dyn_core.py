@@ -426,7 +426,7 @@ class AcousticDynamics(NDSLRuntime):
             )
         )
         self._akap = Float(constants.KAPPA)
-
+        self._damping_coeff_for_heat_source  = constants.CNST_0P20 * damping_coefficients.da_min
         # Locals
         self._make_locals(quantity_factory)
         self._make_persistent_temporaries(quantity_factory)
@@ -928,12 +928,10 @@ class AcousticDynamics(NDSLRuntime):
 
         if self._do_del2cubed:
             self._halo_updaters.heat_source.update()
-            # TODO: move dependence on da_min into init of hyperdiffusion class
-            cd = constants.CNST_0P20 * self._da_min
             # we want to diffuse the heat source from damping before we apply it,
             # so that we don't reinforce the same grid-scale patterns we're trying
             # to damp
-            self._hyperdiffusion(self.heat_source, cd)
+            self._hyperdiffusion(self.heat_source, self._damping_coeff_for_heat_source)
             if not self.config.hydrostatic:
                 delt_time_factor = np.abs(
                     dt_acoustic_substep * Float(self.config.delt_max),
