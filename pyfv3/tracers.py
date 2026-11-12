@@ -39,7 +39,7 @@ def setup_fvtracers(
         tracer in name_mapping for tracer in _EXPECTED_FV_TRACERS
     ):
         raise ValueError(
-            f"FV Tracers requires name mapping for all of the follwoing {_EXPECTED_FV_TRACERS}."
+            f"FV Tracers requires name mapping for all of the following {_EXPECTED_FV_TRACERS}."
             f"Given {name_mapping}."
         )
 

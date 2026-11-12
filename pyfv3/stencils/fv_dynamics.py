@@ -351,7 +351,7 @@ class DynamicalCore(NDSLRuntime):
         self._dp_initial = self.make_local(quantity_factory, [I_DIM, J_DIM, K_DIM])
         self._cvm = self.make_local(quantity_factory, [I_DIM, J_DIM, K_DIM])
 
-        # TODO: this is a true Local, but defining at such breaks `pt` in orchestration
+        # TODO: this is a true Local, but defining as such breaks `pt` in orchestration
         self._te0_2d = quantity_factory.zeros([I_DIM, J_DIM], "")
 
         # Build advection stencils
