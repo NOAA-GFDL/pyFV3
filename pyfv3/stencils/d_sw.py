@@ -722,6 +722,10 @@ def get_column_namelist(
             first_non_zero_index = i
             first_non_zero_value = v
             break
+    if first_non_zero_index == -1:
+        raise RuntimeError(
+            f"D_SW.column: no non-zero values found in nord_col"
+        )
     for v in range(first_non_zero_index, col["nord_v"].view.extent[0]):
         if col["nord_v"].view[v] != first_non_zero_value:
             raise RuntimeError(

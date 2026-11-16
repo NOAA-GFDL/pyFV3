@@ -30,7 +30,7 @@ class YTP_V:
     ):
         if jord not in (5, 6, 7, 8):
             raise NotImplementedError(
-                "Currently ytp_v is only supported for hord_mt == 5,6,7,8"
+                f"Currently ytp_v is only supported for hord_mt == 5,6,7,8 - got {jord}."
             )
         assert (grid_type < 3) or (grid_type == 4)
         grid_indexing = stencil_factory.grid_indexing

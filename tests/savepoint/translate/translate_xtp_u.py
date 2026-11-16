@@ -30,7 +30,7 @@ class XTP_U:
     ):
         if iord not in (5, 6, 7, 8):
             raise NotImplementedError(
-                "Currently xtp_v is only supported for hord_mt == 5,6,7,8"
+                f"Currently xtp_v is only supported for hord_mt == 5,6,7,8 - got {iord}."
             )
         assert (grid_type < 3) or (grid_type == 4)
         grid_indexing = stencil_factory.grid_indexing

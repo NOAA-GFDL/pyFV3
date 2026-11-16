@@ -242,13 +242,12 @@ class DynamicalCore(NDSLRuntime):
             comm: object for cubed sphere or tile inter-process communication
             grid_data: metric terms defining the model grid
             stencil_factory: creates stencils
+            quantity_factory: creates quantities and locals
             damping_coefficients: damping configuration/constants
             config: configuration of dynamical core, for example as would be set by
                 the namelist in the Fortran model
             phis: surface geopotential height
             state: model state
-            exclude_tracer: List of named tracer to be excluded from the Advection,
-                and Remapping schemes
             timestep: model timestep
         """
 
@@ -571,6 +570,9 @@ class DynamicalCore(NDSLRuntime):
         if self.config.hydrostatic:
             raise NotImplementedError("Hydrostatic is not implemented")
 
+        # TODO
+        # Clear Rayleigh Friction Tendencies
+
         # Reset fluxes
         self._reset_I_interface(state.mfxd)
         self._reset_I_interface(state.cxd)
@@ -736,7 +738,7 @@ class DynamicalCore(NDSLRuntime):
                         #       since it's in self.tracers. It should not be an issue
                         #       since we don't have self.tracers & qcld computation
                         #       at the same time
-                        #       When NQ=8, we do need qcld passed explicitely
+                        #       When NQ=8, we do need qcld passed explicitly
                         self._lagrangian_to_eulerian_obj(
                             state.tracers,
                             state.pt,
@@ -764,7 +766,7 @@ class DynamicalCore(NDSLRuntime):
                             self._conserve_total_energy,
                             self._timestep / self._k_split,
                         )
-                # TODO: can we pull this block out of the loop intead of
+                # TODO: can we pull this block out of the loop instead of
                 # using an if-statement?
 
                 # Update state fluxes and courant number
