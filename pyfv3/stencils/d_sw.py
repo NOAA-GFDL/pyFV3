@@ -91,6 +91,7 @@ def heat_diss(
         if damp_w > 1e-5:
             dd8 = ke_bg * abs(dt)
             dw = (fx2 - fx2[1, 0, 0] + fy2 - fy2[0, 1, 0]) * rarea
+            # TODO(rc): add k-dependent `d_con` here
             heat_source = dd8 - dw * (w + 0.5 * dw)
             if __INLINED(do_stochastic_ke_backscatter):
                 diss_est = heat_source
@@ -723,9 +724,7 @@ def get_column_namelist(
             first_non_zero_value = v
             break
     if first_non_zero_index == -1:
-        raise RuntimeError(
-            f"D_SW.column: no non-zero values found in nord_col"
-        )
+        raise RuntimeError("D_SW.column: no non-zero values found in nord_col")
     for v in range(first_non_zero_index, col["nord_v"].view.extent[0]):
         if col["nord_v"].view[v] != first_non_zero_value:
             raise RuntimeError(

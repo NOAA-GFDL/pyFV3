@@ -625,7 +625,8 @@ class FiniteVolumeFluxPrep(NDSLRuntime):
         dt,
     ):
         """
-        Updates flux operators and courant numbers for fvtp2d
+        Updates flux operators and courant numbers for fvtp2d.
+
         To start off D_SW after the C-grid winds have been advanced half a timestep,
         and and compute finite volume transport on the D-grid (e.g.Putman and Lin 2007),
         this module prepares terms such as parts of equations 7 and 13 in Putnam and

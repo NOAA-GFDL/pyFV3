@@ -92,7 +92,7 @@ def compute_gz_ws(
     gz: FloatField,
 ):
     """
-        Compute gz and wd, eusures gz is monotonically increasing in z at the end
+        Compute gz and wd, ensures gz is monotonically increasing in z at the end.
 
     Args
         gz_y(in): gz with corners copied to perform derivatives in y-direction
