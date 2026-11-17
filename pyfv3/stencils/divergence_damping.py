@@ -4,7 +4,7 @@ import numpy as np
 from ndsl import NDSLRuntime, Quantity, QuantityFactory, StencilFactory
 from ndsl.constants import I_DIM, I_INTERFACE_DIM, J_DIM, J_INTERFACE_DIM, K_DIM
 from ndsl.dsl.dace.orchestration import dace_inhibitor
-from ndsl.dsl.gt4py import __INLINED, PARALLEL, computation, float32
+from ndsl.dsl.gt4py import PARALLEL, computation, float32
 from ndsl.dsl.gt4py import function as gtfunction
 from ndsl.dsl.gt4py import horizontal, interval, region, sqrt
 from ndsl.dsl.stencil import get_stencils_with_varied_bounds
@@ -242,7 +242,6 @@ def redo_divg_d(
     uc: FloatField,
     vc: FloatField,
     divg_d: FloatField,
-    adjustment_factor: FloatFieldIJ,
 ):
     """
     Args:
@@ -251,9 +250,8 @@ def redo_divg_d(
         vc (in): intermediate component of hyperdiffusion defined on
             same grid as c-grid y-wind
         divg_d (out): updated divergence for hyperdiffusion on d-grid
-        adjustment_factor (in):
     """
-    from __externals__ import do_adjustment, i_end, i_start, j_end, j_start
+    from __externals__ import i_end, i_start, j_end, j_start
 
     with computation(PARALLEL), interval(...):
         divg_d = uc[0, -1, 0] - uc + vc[-1, 0, 0] - vc
@@ -263,10 +261,6 @@ def redo_divg_d(
             divg_d = divg_d - uc[0, -1, 0]
         with horizontal(region[i_start, j_end + 1], region[i_end + 1, j_end + 1]):
             divg_d = divg_d + uc
-
-    with computation(PARALLEL), interval(...):
-        if __INLINED(do_adjustment):
-            divg_d = divg_d * adjustment_factor
 
 
 def smagorinsky_diffusion_approx(delpc: FloatField, vort: FloatField, absdt: Float):
@@ -498,7 +492,6 @@ class DivergenceDamping(NDSLRuntime):
             origins=origins,
             domains=domains,
             stencil_factory=stencil_factory,
-            externals={"do_adjustment": not stretched_grid},
         )
 
         self._set_value = high_k_stencil_factory.from_dims_halo(
@@ -690,7 +683,7 @@ class DivergenceDamping(NDSLRuntime):
             # TODO(eddied): We pass the same fields 2x to avoid GTC validation errors
             if fillc:
                 self._fill_corners_dgrid_stencil(vc, vc, uc, uc, -1.0)
-            self._redo_divg_d_stencils[n](uc, vc, divg_d, self._rarea_c)
+            self._redo_divg_d_stencils[n](uc, vc, divg_d)
 
         if self._dddmp < 1e-5:
             self._set_value(damped_rel_vort_bgrid, 0.0)
