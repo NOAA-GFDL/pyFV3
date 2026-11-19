@@ -220,6 +220,7 @@ class TranslateHeatDiss(TranslateDycoreFortranData2Py):
         # TODO add these to the serialized data or remove the test
         inputs["damp_w"] = column_namelist["damp_w"]
         inputs["ke_bg"] = column_namelist["ke_bg"]
+        inputs["d_con"] = column_namelist["d_con"]
         inputs["dt"] = Float(
             self.config.dt_atmos / self.config.k_split / self.config.n_split
         )

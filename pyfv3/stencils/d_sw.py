@@ -60,6 +60,7 @@ def heat_diss(
     dw: FloatField,
     damp_w: FloatFieldK,
     ke_bg: FloatFieldK,
+    d_con: FloatFieldK,
     dt: Float,
 ):
     """
@@ -82,6 +83,7 @@ def heat_diss(
             and not physical it's not necessary to include.
         damp_w (in):
         ke_bg (in):
+        d_con (in):
     """
     from __externals__ import do_stochastic_ke_backscatter
 
@@ -91,8 +93,7 @@ def heat_diss(
         if damp_w > 1e-5:
             dd8 = ke_bg * abs(dt)
             dw = (fx2 - fx2[1, 0, 0] + fy2 - fy2[0, 1, 0]) * rarea
-            # TODO(rc): add k-dependent `d_con` here
-            heat_source = dd8 - dw * (w + 0.5 * dw)
+            heat_source = dd8 - d_con * dw * (w + 0.5 * dw)
             if __INLINED(do_stochastic_ke_backscatter):
                 diss_est = heat_source
 
@@ -651,7 +652,6 @@ def get_column_namelist(
     """
     Generate a dictionary of columns that specify how parameters (such as nord, damp)
     used in several functions called by D_SW vary over the k-dimension.
-
     """
     direct_namelist = ["ke_bg", "d_con", "nord"]
     all_names = direct_namelist + [
@@ -1152,6 +1152,7 @@ class DGridShallowWaterLagrangianDynamics(NDSLRuntime):
             self._tmp_dw,
             self._column_namelist["damp_w"],
             self._column_namelist["ke_bg"],
+            self._column_namelist["d_con"],
             dt,
         )
 
@@ -1276,6 +1277,9 @@ class DGridShallowWaterLagrangianDynamics(NDSLRuntime):
             self._vorticity_agrid,
             dt,
         )
+
+        # ub/vb computation in Fortran code is handled below in
+        # self._vort_differencing_stencil()
 
         # Vorticity transport
         self._rel_vorticity_to_abs(
