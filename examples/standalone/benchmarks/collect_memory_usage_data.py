@@ -54,8 +54,8 @@ def gather_memory_usage_from_file(filename):
             elif "GPU utilization data" in line:
                 # skip the four header lines
                 data_lines = all_lines[index + 4 :]
-                for line in data_lines:
-                    splits = line.split()
+                for data_line in data_lines:
+                    splits = data_line.split()
                     if len(splits) > 1 and splits[1].isnumeric():
                         collected_data["data"].append(float(splits[1]))
                     else:
