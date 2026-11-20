@@ -1,5 +1,3 @@
-from typing import Optional
-
 from f90nml import Namelist
 
 from ndsl import StencilFactory
@@ -37,15 +35,13 @@ class TranslateDivergenceDamping(TranslateDycoreFortranData2Py):
             "delpc": {},
         }
         self.max_error = 1.4e-10
-        self.divdamp: Optional[DivergenceDamping] = None
-        self.stencil_factory = stencil_factory
 
     def compute_from_storage(self, inputs):
         nord_col = self.grid.quantity_factory.zeros(dims=[K_DIM], units="unknown")
         nord_col[:] = nord_col.np.asarray(inputs.pop("nord_col"))
         d2_bg = self.grid.quantity_factory.zeros(dims=[K_DIM], units="unknown")
         d2_bg[:] = d2_bg.np.asarray(inputs.pop("d2_bg"))
-        self.divdamp = DivergenceDamping(
+        divdamp = DivergenceDamping(
             self.stencil_factory,
             self.grid.quantity_factory,
             self.grid.grid_data,
@@ -59,5 +55,5 @@ class TranslateDivergenceDamping(TranslateDycoreFortranData2Py):
             nord_col,
             d2_bg,
         )
-        self.divdamp(**inputs)
+        divdamp(**inputs)
         return inputs
