@@ -206,6 +206,9 @@ def damping_nord_highorder_stencil(
         delpc (in): divergence on cell corners
         divg_d (in): higher-order divergence on d-grid
         d2_bg (in): background second-order divergence damping coefficient
+        da_min_c (in):
+        dddmp (in):
+        dd8 (in):
     """
     # TODO: propagate variable renaming into this routine
     with computation(PARALLEL), interval(...):
@@ -713,17 +716,10 @@ class DivergenceDamping(NDSLRuntime):
                     abs(dt),
                 )
 
-        if self._stretched_grid:
-            # reference https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere/blob/main/model/sw_core.F90#L1422 # noqa: E501
-            dd8 = Float(
-                self._damping_coefficients.da_min
-                * np.power(self._d4_bg, (self._nonzero_nord + 1))
-            )
-        else:
-            dd8 = np.power(
-                (self._damping_coefficients.da_min_c * self._d4_bg),
-                (self._nonzero_nord + 1),
-            ).astype(Float)
+        # reference https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere/blob/main/model/sw_core.F90#L1422 # noqa: E501
+        dd8 = self._damping_coefficients.da_min * np.power(
+            self._d4_bg, (self._nonzero_nord + 1), dtype=Float
+        )
 
         self._damping_nord_highorder_stencil(
             damped_rel_vort_bgrid,
