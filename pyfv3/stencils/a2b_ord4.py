@@ -5,7 +5,6 @@ from ndsl.constants import (
     J_DIM,
     J_INTERFACE_DIM,
     K_DIM,
-    K_INTERFACE_DIM,
 )
 from ndsl.dsl.gt4py import PARALLEL, asin, computation, cos
 from ndsl.dsl.gt4py import function as gtfunction
@@ -558,9 +557,7 @@ class AGrid2BGridFourthOrderInPlace(NDSLRuntime):
             z_dim,
         )
 
-        self._tmp_q_to_bgrid = self.make_local(
-            quantity_factory, [I_DIM, J_DIM, K_INTERFACE_DIM]
-        )
+        self._tmp_q_to_bgrid = self.make_local(quantity_factory, [I_DIM, J_DIM, z_dim])
         self._copy_stencil = stencil_factory.from_dims_halo(
             copy, compute_dims=[I_INTERFACE_DIM, J_INTERFACE_DIM, z_dim]
         )

@@ -98,6 +98,7 @@ from .translate_riem_solver3 import TranslateRiem_Solver3
 from .translate_riem_solver_c import TranslateRiem_Solver_C
 from .translate_satadjust3d import TranslateSatAdjust3d
 from .translate_scalar_profile import TranslateScalar_Profile
+from .translate_smag_corner import TranslateSmagCorner
 from .translate_te_zsum import TranslateTe_Zsum
 from .translate_tracer2d1l import TranslateTracer2D1L
 from .translate_tracer2d1l_cmax import TranslateTracerCMax
