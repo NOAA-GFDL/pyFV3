@@ -79,7 +79,8 @@ class DGridShallowWaterLagrangianDynamicsConfig:
     d2_bg: Float
     d2_bg_k1: Float
     d2_bg_k2: Float
-    d4_bg: Float
+    d4_bg_bot: Float
+    d4_bg_top: Float
     ke_bg: Float
     nord: Int
     n_sponge: Int
@@ -171,7 +172,8 @@ class DynamicalCoreConfig:
     d2_bg: Float = DEFAULT_FLOAT
     d2_bg_k1: Float = DEFAULT_FLOAT
     d2_bg_k2: Float = DEFAULT_FLOAT
-    d4_bg: Float = DEFAULT_FLOAT
+    d4_bg_bot: Float = DEFAULT_FLOAT
+    d4_bg_top: Float = DEFAULT_FLOAT
     d_con: Float = DEFAULT_FLOAT
     d_ext: Float = DEFAULT_FLOAT
     dddmp: Float = DEFAULT_FLOAT
@@ -291,13 +293,7 @@ class DynamicalCoreConfig:
 
     def __post_init__(self) -> None:
         if self.namelist_override is not None:
-            try:
-                f90_nml = f90nml.read(self.namelist_override)
-            except FileNotFoundError:
-                print(f"{self.namelist_override} does not exist")
-                raise
-            # TODO: Find a better way to do below. Passing self.* as an argument
-            # to a class function of the same class is always a bit fishy.
+            f90_nml = f90nml.read(self.namelist_override)
             dycore_config = self.from_f90nml(f90_nml, self.target_nml_groups)
             for var in dycore_config.__dict__.keys():
                 setattr(self, var, dycore_config.__dict__[var])
@@ -420,7 +416,8 @@ class DynamicalCoreConfig:
             d2_bg=self.d2_bg,
             d2_bg_k1=self.d2_bg_k1,
             d2_bg_k2=self.d2_bg_k2,
-            d4_bg=self.d4_bg,
+            d4_bg_bot=self.d4_bg_bot,
+            d4_bg_top=self.d4_bg_top,
             ke_bg=self.ke_bg,
             nord=self.nord,
             n_sponge=self.n_sponge,

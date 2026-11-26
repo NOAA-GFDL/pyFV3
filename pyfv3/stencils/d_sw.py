@@ -833,6 +833,24 @@ class DGridShallowWaterLagrangianDynamics(NDSLRuntime):
                 "D-Grid Shallow Water Lagrangian Dynamics (D_SW): Hydrostatic is not implemented"
             )
 
+        if config.d4_bg_bot != config.d4_bg_top:
+            raise NotImplementedError(
+                f"d4_bg_bot ({config.d4_bg_bot}) != d4_bg_top ({config.d4_bg_top}). "
+                "Implement d4dmp(k) below and pass a FloatFieldK to DivergenceDamping."
+            )
+        # High order divergence damping coefs (less diffusion in the troposphere)
+        # NOTE:
+        #   if d4_bg_top == d4_bg_bot, then
+        #       `d4dmp(k) = d4_bg_{bot,top} * (1.0 + d4dmp(k) - d4dmp(k))`
+        #   i.e. the whole calculation is unnecessary
+        # do k = 1, npz
+        #     d4dmp(k) = &
+        #         MAX(0.0, &
+        #             MIN(1.0, SIN(0.5 * pi * LOG(25000.0 / pfull(k)) / LOG(25000.0 / ptop))))
+        #
+        #     d4dmp(k) = d4_bg_top * d4dmp(k) + d4_bg_bot * (1.0 - d4dmp(k))
+        # end do
+
         # locals
         self._tmp_heat_s = self.make_local(quantity_factory, [I_DIM, J_DIM, K_DIM])
         self._tmp_diss_e = self.make_local(quantity_factory, [I_DIM, J_DIM, K_DIM])
@@ -928,7 +946,7 @@ class DGridShallowWaterLagrangianDynamics(NDSLRuntime):
             nested=nested,
             stretched_grid=stretched_grid,
             dddmp=config.dddmp,
-            d4_bg=config.d4_bg,
+            d4_bg=config.d4_bg_top,  # assumption: d4_bg_top == d4_bg_bot
             nord=config.nord,
             grid_type=config.grid_type,
             nord_col=column_namelist["nord"],
@@ -1273,8 +1291,6 @@ class DGridShallowWaterLagrangianDynamics(NDSLRuntime):
             uc,
             delpc,
             self._dt_kinetic_energy_on_cell_corners,
-            # a-grid relative vorticity computed before divergence damping
-            self._vorticity_agrid,
             dt,
         )
 

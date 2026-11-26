@@ -4,7 +4,7 @@ import numpy as np
 from ndsl import NDSLRuntime, Quantity, QuantityFactory, StencilFactory
 from ndsl.constants import I_DIM, I_INTERFACE_DIM, J_DIM, J_INTERFACE_DIM, K_DIM
 from ndsl.dsl.dace.orchestration import dace_inhibitor
-from ndsl.dsl.gt4py import PARALLEL, computation, float32
+from ndsl.dsl.gt4py import PARALLEL, computation
 from ndsl.dsl.gt4py import function as gtfunction
 from ndsl.dsl.gt4py import horizontal, interval, region, sqrt
 from ndsl.dsl.stencil import get_stencils_with_varied_bounds
@@ -17,14 +17,12 @@ from pyfv3.stencils.d2a2c_vect import contravariant
 
 @gtfunction
 def damp_tmp(q, da_min_c, d2_bg, dddmp):
-    damp: float32 = da_min_c * max(d2_bg, min(0.2, dddmp * abs(q)))
-    return damp
+    return da_min_c * max(d2_bg, min(0.2, dddmp * abs(q)))
 
 
 @gtfunction
 def damp_tmp2(q, da_min_c, d2_bg, dddmp):
-    damp: float32 = da_min_c * max(d2_bg, min(0.2, dddmp * q))
-    return damp
+    return da_min_c * max(d2_bg, min(0.2, dddmp * q))
 
 
 def compute_u_contra_dyc(
@@ -53,7 +51,7 @@ def compute_u_contra_dyc(
 
     Porting Notes
     * The compute_u_contra_dyc and compute_v_contra_dxc functions have
-      the dyc and dxc values incorporated earlier in the calcuation rather than later,
+      the dyc and dxc values incorporated earlier in the calculation rather than later,
       and this enables the u_contra_dyc and v_contra_dxc values
       to match with the Fortran.
       As a result, the delpc computation matches the Fortran value of delpc.
@@ -182,7 +180,7 @@ def damping(
     """
     with computation(PARALLEL), interval(...):
         delpcdt = delpc * dt
-        damp = damp_tmp(delpcdt, da_min_c, d2_bg, dddmp)
+        damp: Float = damp_tmp(delpcdt, da_min_c, d2_bg, dddmp)
         vort = damp * delpc
         ke += vort
 
@@ -212,7 +210,7 @@ def damping_nord_highorder_stencil(
     """
     # TODO: propagate variable renaming into this routine
     with computation(PARALLEL), interval(...):
-        damp = damp_tmp2(vort, da_min_c, d2_bg, dddmp)
+        damp: Float = damp_tmp2(vort, da_min_c, d2_bg, dddmp)
         vort = damp * delpc + dd8 * divg_d
         ke = ke + vort
 
@@ -494,7 +492,7 @@ class DivergenceDamping(NDSLRuntime):
         nested: bool,
         stretched_grid: bool,
         dddmp: Float,
-        d4_bg,
+        d4_bg: Float,
         nord: int,
         grid_type: int,
         nord_col: Quantity,
@@ -510,7 +508,7 @@ class DivergenceDamping(NDSLRuntime):
         # TODO: make da_min_c a compile-time external, instead of runtime scalar
         self._damping_coefficients = damping_coefficients
         self._stretched_grid = stretched_grid
-        self._d4_bg = Float(d4_bg)
+        self._d4_bg = d4_bg
         self._grid_type = grid_type
         self._nord_column = nord_col
         self._d2_bg_column = d2_bg
@@ -716,7 +714,6 @@ class DivergenceDamping(NDSLRuntime):
         uc: FloatField,
         delpc: FloatField,
         ke: FloatField,
-        rel_vort_agrid: FloatField,
         dt: Float,
     ):
         """
@@ -746,9 +743,6 @@ class DivergenceDamping(NDSLRuntime):
                 at input time must be accurate for the input winds.
                 Gets updated to remain accurate for the output winds,
                 as described in section 8.3 of the FV3 documentation.
-            rel_vort_agrid (in): a-grid relative vorticity computed before
-                divergence damping
-                gets converted by a2b_ord4 and put into v_contra_dxc
             dt (in): timestep
         """
         # TODO: is there anything we can do to APIs to make it clear that divg_d is not
@@ -846,8 +840,9 @@ class DivergenceDamping(NDSLRuntime):
             )
 
         # reference https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere/blob/main/model/sw_core.F90#L1422 # noqa: E501
-        dd8 = self._damping_coefficients.da_min * np.power(
-            self._d4_bg, (self._nonzero_nord + 1), dtype=Float
+        dd8 = Float(
+            self._damping_coefficients.da_min
+            * Float(self._d4_bg) ** (self._nonzero_nord + 1)
         )
 
         self._damping_nord_highorder_stencil(

@@ -46,6 +46,7 @@ class TranslateSmagCorner(TranslateDycoreFortranData2Py):
             self.config.grid_type,
         )
 
+        inputs.pop("nord_col")  # fix for numpy backend
         self._smagorinsky_diffusion(
             **inputs,
             dx=self.grid.dx,

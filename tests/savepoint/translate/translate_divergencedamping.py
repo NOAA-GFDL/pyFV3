@@ -2,6 +2,7 @@ from f90nml import Namelist
 
 from ndsl import StencilFactory
 from ndsl.constants import K_DIM
+from ndsl.stencils.testing import Grid
 from pyfv3.stencils import DivergenceDamping
 from pyfv3.testing import TranslateDycoreFortranData2Py
 
@@ -9,7 +10,7 @@ from pyfv3.testing import TranslateDycoreFortranData2Py
 class TranslateDivergenceDamping(TranslateDycoreFortranData2Py):
     def __init__(
         self,
-        grid,
+        grid: Grid,
         namelist: Namelist,
         stencil_factory: StencilFactory,
     ):
@@ -25,7 +26,6 @@ class TranslateDivergenceDamping(TranslateDycoreFortranData2Py):
             "uc": {},
             "delpc": {},
             "ke": {},
-            "rel_vort_agrid": {"serialname": "wk"},
             "nord_col": {},
             "d2_bg": {},
         }
@@ -41,6 +41,10 @@ class TranslateDivergenceDamping(TranslateDycoreFortranData2Py):
         nord_col[:] = nord_col.np.asarray(inputs.pop("nord_col"))
         d2_bg = self.grid.quantity_factory.zeros(dims=[K_DIM], units="unknown")
         d2_bg[:] = d2_bg.np.asarray(inputs.pop("d2_bg"))
+
+        # Assumption: see comment in D_SW.init()
+        assert self.config.d4_bg_top == self.config.d4_bg_bot
+
         divdamp = DivergenceDamping(
             self.stencil_factory,
             self.grid.quantity_factory,
@@ -49,7 +53,7 @@ class TranslateDivergenceDamping(TranslateDycoreFortranData2Py):
             self.grid.nested,
             self.grid.stretched_grid,
             self.config.dddmp,
-            self.config.d4_bg,
+            self.config.d4_bg_bot,  # assumption d4_bg_top == d4_bg_bot
             self.config.nord,
             self.config.grid_type,
             nord_col,

@@ -69,6 +69,10 @@ class TranslateA2B_Ord4(TranslateDycoreFortranData2Py):
     def compute_from_storage(self, inputs):
         nord_col = self.grid.quantity_factory.zeros(dims=[K_DIM], units="unknown")
         nord_col[:] = nord_col.np.asarray(inputs.pop("nord_col"))
+
+        # Assumption: see comment in D_SW.init()
+        assert self.config.d4_bg_top == self.config.d4_bg_bot
+
         divdamp = DivergenceDamping(
             self.stencil_factory,
             self.grid.quantity_factory,
@@ -77,11 +81,11 @@ class TranslateA2B_Ord4(TranslateDycoreFortranData2Py):
             self.grid.nested,
             self.grid.stretched_grid,
             self.config.dddmp,
-            self.config.d4_bg,
+            self.config.d4_bg_top,  # assumption d4_bg_top == d4_bg_bot
             self.config.nord,
             self.config.grid_type,
             nord_col,
-            nord_col,
+            nord_col,  # NOTE: shouldn't this be d2_bg?
         )
         # TODO: use proper grid_type values when refactor into an enum
         inputs["grid_type"] = 0
