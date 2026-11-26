@@ -4,7 +4,7 @@ from .d2a2c_vect import DGrid2AGrid2CGridVectors
 from .d_sw import DGridShallowWaterLagrangianDynamics
 from .del2cubed import HyperdiffusionDamping
 from .delnflux import DelnFlux, DelnFluxNoSG
-from .divergence_damping import DivergenceDamping
+from .divergence_damping import DivergenceDamping, SmagorinskyDiffusion
 from .dyn_core import AcousticDynamics
 from .fillz import FillNegativeTracerValues
 from .fv_dynamics import DynamicalCore
@@ -56,6 +56,7 @@ NonhydrostaticVerticalSolverCGrid: Calculates nonhydrostatic w and p after
                                    C-grid advection
 SatAdjust3d: Fast microphysical phase changes
 Sim1Solver: Semi-implicit method solver
+SmagorinskyDiffusion: Part of divergence damping
 TracerAdvection: Advects tracers
 UpdateGeopotentialHeightOnCGrid: Updates cell heights on C-grid
 UpdateHeightOnDGrid: Updates cell heights on D-grid
@@ -90,6 +91,7 @@ __all__ = [
     "NonhydrostaticVerticalSolverCGrid",
     "SatAdjust3d",
     "Sim1Solver",
+    "SmagorinskyDiffusion",
     "TracerAdvection",
     "UpdateGeopotentialHeightOnCGrid",
     "UpdateHeightOnDGrid",

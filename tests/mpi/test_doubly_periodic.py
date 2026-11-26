@@ -39,7 +39,8 @@ def test_dycore_runs_one_step() -> None:
         d2_bg=0.0,
         d2_bg_k1=0.2,
         d2_bg_k2=0.1,
-        d4_bg=0.15,
+        d4_bg_bot=0.15,
+        d4_bg_top=0.15,
         d_con=1.0,
         d_ext=0.0,
         dddmp=0.5,
@@ -135,6 +136,7 @@ def test_dycore_runs_one_step() -> None:
         config=config,
         phis=state.phis,
         state=state,
+        exclude_tracers=[],
         timestep=timedelta(seconds=255),
     )
 

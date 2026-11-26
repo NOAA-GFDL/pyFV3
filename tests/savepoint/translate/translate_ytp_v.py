@@ -30,7 +30,7 @@ class YTP_V:
     ):
         if jord not in (5, 6, 7, 8):
             raise NotImplementedError(
-                "Currently ytp_v is only supported for hord_mt == 5,6,7,8"
+                f"Currently ytp_v is only supported for hord_mt == 5,6,7,8 - got {jord}."
             )
         assert (grid_type < 3) or (grid_type == 4)
         grid_indexing = stencil_factory.grid_indexing
@@ -83,7 +83,6 @@ class TranslateYTP_V(TranslateDycoreFortranData2Py):
         self.in_vars["data_vars"] = {"c": c_info, "v": {}, "flux": flux_info}
         self.in_vars["parameters"] = []
         self.out_vars = {"flux": flux_info}
-        self.stencil_factory = stencil_factory
 
     def compute_from_storage(self, inputs):
         ytp_obj = YTP_V(
